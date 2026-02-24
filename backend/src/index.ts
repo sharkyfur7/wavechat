@@ -8,11 +8,11 @@ import { auth } from "./auth.js";
 
 dotenv.config({ quiet: true });
 const DEV_ENV = process.env.DEV_ENV;
-const CORS_ORIGIN = process.env.CORS_ORIGIN;
+const BETTER_AUTH_TRUSTED_ORIGIN = process.env.BETTER_AUTH_TRUSTED_ORIGIN;
 
 const app = express();
 const port = Number(process.env.PORT) ?? 3000;
-app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
+app.use(cors({ origin: BETTER_AUTH_TRUSTED_ORIGIN, credentials: true }));
 app.set("trust proxy", 1);
 
 if (!DEV_ENV) {
