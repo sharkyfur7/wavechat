@@ -3,8 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
+import WebSocket, { WebSocketServer } from "ws";
 
 import { auth } from "./auth.js";
+import { insertMessage } from "./db.js";
 
 dotenv.config({ quiet: true });
 const DEV_ENV = process.env.DEV_ENV;
@@ -14,6 +16,7 @@ const app = express();
 const port = Number(process.env.PORT) ?? 3000;
 app.use(cors({ origin: BETTER_AUTH_TRUSTED_ORIGIN, credentials: true }));
 app.set("trust proxy", 1);
+app.use(express.json());
 
 if (!DEV_ENV) {
   const limiter = rateLimit({
@@ -32,12 +35,58 @@ app.get("/", (req, res) => {
   res.status(200).json("I am alive.");
 });
 
+app.post("/message", async (req, res) => {
+  const session = await auth.api.getSession({ headers: req.headers as Record<string, string> });
+  if (!session) return res.status(401).json({ error: "Unauthorized" });
+
+  console.log(req.body);
+  const { content, channel } = req.body;
+
+  await insertMessage(session.user, channel, content);
+});
+
 app.all("/auth/{*any}", toNodeHandler(auth));
 
-app.listen(port, "0.0.0.0", () => {
+const server = app.listen(port, "0.0.0.0", () => {
   console.log(`Listening on port http://localhost:${port}`);
 });
 
-app.use(express.json());
+const wss = new WebSocketServer({ server });
+const clients = new Map<WebSocket, { userId: string; channelId: number }>();
+
+wss.on("connection", async (ws, req) => {
+  const session = await auth.api.getSession({ headers: req.headers as Record<string, string> });
+
+  if (!session) {
+    // unauthorized
+    ws.close();
+    return;
+  }
+
+  ws.on("message", (data) => {
+    const { type, content, channelId } = JSON.parse(data.toString());
+
+    if (type === "message") {
+      console.log(`User ${session.user.name} sent message "${content}" to channelId ${channelId}`);
+
+      clients.forEach((meta, client) => {
+        if (meta.channelId === channelId && client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              type: "message",
+              content,
+              userId: session.user.id,
+              userName: session.user.name,
+            }),
+          );
+        }
+      });
+    }
+
+    if (type === "subscribe") {
+      clients.set(ws, { userId: session.user.id, channelId: channelId });
+    }
+  });
+});
 
 export default app;
