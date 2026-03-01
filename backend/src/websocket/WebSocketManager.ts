@@ -32,9 +32,6 @@ export class WebSocketManager {
     const msg: WSMessage = JSON.parse(data);
 
     switch (msg.type) {
-      case "message":
-        this.broadcastMessage(msg.payload);
-        break;
       case "subscribe":
         if (!msg.payload?.channelId) throw new Error("channelId missing in subscribe payload!");
         this.setClient(ws, user.id, msg.payload?.channelId);

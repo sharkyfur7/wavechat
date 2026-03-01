@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
-import { addChannelMember, createChannel } from "../db/channel.js";
-import { getUserChannels } from "../db/user.js";
+import { addChannelMember, createChannel, getChannel } from "../db/channel.js";
+import { getUser, getUserChannels } from "../db/user.js";
 
 const apiRoutes = Router();
 
@@ -11,13 +11,35 @@ apiRoutes.get("/", (req, res) => {
 
 apiRoutes.post("/createChannel", requireAuth, async (req, res) => {
   const { channelName } = req.body;
-  await createChannel(channelName);
+
+  let channelName_str: string = channelName.toString();
+  channelName_str = channelName_str.trim();
+
+  if (channelName_str === "") {
+    res.sendStatus(400);
+    return;
+  }
+
+  await createChannel(channelName_str);
 
   res.sendStatus(201);
 });
 
 apiRoutes.post("/addChannelMember", requireAuth, async (req, res) => {
   const { userId, channelId } = req.body;
+
+  if (!userId || !channelId) {
+    res.sendStatus(400);
+    return;
+  }
+
+  const user = await getUser(userId);
+  const channel = await getChannel(channelId);
+
+  if (!user || !channel) {
+    res.sendStatus(400);
+    return;
+  }
 
   try {
     await addChannelMember(channelId, userId);

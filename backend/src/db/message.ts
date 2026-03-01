@@ -45,7 +45,8 @@ export async function getMessages(channelId: number, limit = 50): Promise<ChatMe
     .from(message)
     .innerJoin(user, eq(message.userId, user.id))
     .where(eq(message.channelId, channelId))
-    .orderBy(message.createdAt);
+    .orderBy(message.createdAt)
+    .limit(limit);
 
   return result;
 }

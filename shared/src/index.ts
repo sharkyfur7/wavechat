@@ -12,5 +12,6 @@ export type ChatMessage = {
 
 export type Channel = {
   name: string;
-  id: string;
+  id: number;
+  createdAt: Date;
 };

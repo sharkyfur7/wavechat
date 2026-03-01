@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 
 import { auth } from "./auth.js";
 import channelRouter from "./routes/channelRouter.js";
@@ -21,8 +21,6 @@ app.set("trust proxy", 1);
 app.use(express.json());
 
 app.use("/channels", channelRouter);
-
-const clients = new Map<WebSocket, { userId: string; channelId: number }>();
 
 if (!DEV_ENV) {
   const limiter = rateLimit({

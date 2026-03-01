@@ -1,5 +1,6 @@
+import { User } from "better-auth";
 import { db } from "../db.js";
-import { channel, channelMember } from "./schema.js";
+import { channel, channelMember, user } from "./schema.js";
 import { eq, getTableColumns } from "drizzle-orm";
 
 export async function getUserChannels(userId: string) {
@@ -12,4 +13,8 @@ export async function getUserChannels(userId: string) {
     .where(eq(channelMember.userId, userId));
 
   return result;
+}
+
+export async function getUser(userId: string): Promise<User | undefined> {
+  return await db.select().from(user).where(eq(user.id, userId)).limit(1)[0];
 }
