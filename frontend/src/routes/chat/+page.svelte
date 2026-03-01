@@ -1,74 +1,47 @@
 <script lang="ts">
 	import Navbar from '$lib/components/Navbar.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import { getSessionData } from '../auth/page.svelte';
-	import { PUBLIC_API_URL, PUBLIC_WEBSOCKET_URL } from '$env/static/public';
 	import UserInfo from '$lib/components/UserInfo.svelte';
-	import type { SessionData } from '../../types';
-	import { sleep } from '$lib/util';
 	import ChatMessageComponent from '$lib/components/ChatMessageComponent.svelte';
-	import type { ChatMessage } from '../../types';
+	import { chatStore } from '$lib/stores/chatStore.svelte';
+	import { getSessionData } from '../auth/page.svelte';
+	import type { Channel, SessionData } from '../../types';
+	import { onDestroy, onMount } from 'svelte';
+	import { sleep } from '$lib/util';
+	import { PUBLIC_API_URL } from '$env/static/public';
 
-	let message_history: ChatMessage[] = $state([]);
-
-	let message = $state('');
-	let channelId = $state(0);
 	let sessionData: SessionData | null = $state(null);
-	let ws: WebSocket;
-	let ws_id: number;
-	let ws_state = $state('CONNECTING');
-
-	async function wsConnect() {
-		ws?.close();
-		ws = new WebSocket(PUBLIC_WEBSOCKET_URL);
-		ws_id = Math.round(Math.random() * 1000);
-
-		ws.onopen = async (event) => {
-			ws_state = 'OPEN';
-
-			await sleep(50);
-			ws.send(JSON.stringify({ type: 'subscribe', channelId: 0 }));
-		};
-
-		ws.onclose = async (event) => {
-			ws_state = 'DISCONNECTED... reconnecting...';
-			await sleep(3000);
-			wsConnect();
-		};
-
-		ws.onmessage = (event) => {
-			const { type, message } = JSON.parse(event.data);
-
-			if (type === 'message') {
-				let msg: ChatMessage = message;
-
-				message_history.push(message);
-				message_history = message_history; // trigger reactivity
-			}
-		};
-	}
+	let channelId: number | null = $state(null);
+	let message = $state('');
+	let channels: Channel[] = $state([]);
 
 	async function sendMessage() {
-		const response = await fetch(`${PUBLIC_API_URL}/message`, {
-			method: 'POST',
-			body: JSON.stringify({ content: message, channelId: channelId }),
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			credentials: 'include'
-		});
+		if (!channelId) return;
 
-		alert(await response.json());
+		chatStore.sendMessage(channelId, message);
 		message = '';
 	}
 
 	onMount(async () => {
 		sessionData = await getSessionData();
-		await wsConnect();
+		channels = await fetch(`${PUBLIC_API_URL}/getUserChannels`, {
+			credentials: 'include'
+		})
+			.then((r) => r.json())
+			.then((d) => d.channels);
+
+		chatStore.connect();
+		await sleep(100);
+		channelId = channels[0].id;
+		chatStore.subscribe(channelId);
 	});
 
-	onDestroy(() => {
-		ws?.close();
+	onDestroy(() => chatStore.disconnect());
+
+	$effect(() => {
+		if (channelId) {
+			chatStore.subscribe(channelId);
+			chatStore.loadMessages(channelId);
+		}
 	});
 </script>
 
@@ -77,15 +50,15 @@
 <UserInfo {sessionData} />
 
 <div>
-	Websocket state: {ws_state}<br />
+	Websocket state: {chatStore.wsState}<br />
 	ChannelId: {channelId}
 </div>
 
 <div>
 	<div id="chatbox">
-		{#each message_history as message}
+		{#each chatStore.messages as message}
 			<ChatMessageComponent
-				userName={message.userName}
+				userName={message.user.name}
 				content={message.content}
 				date={new Date(message.createdAt)}
 			/>
@@ -94,7 +67,9 @@
 
 	<div>
 		<select bind:value={channelId} name="channel">
-			<option value={0}>default</option>
+			{#each channels as channel}
+				<option value={channel.id}>{channel.name}</option>
+			{/each}
 		</select>
 		<input style="width: 24em;" bind:value={message} type="text" />
 		<button onclick={sendMessage}>send</button>

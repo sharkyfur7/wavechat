@@ -1,12 +1,14 @@
 {
   "private": true,
   "workspaces": [
-    "packages/*"
+    "shared",
+    "frontend",
+    "backend"
   ],
   "dependencies": {
     "concurrently": "^9.2.1"
   },
   "scripts": {
-    "dev": "concurrently 'cd backend && npm run dev' 'cd frontend && npm run dev'"
+    "dev": "cd shared && npm run build && cd .. && concurrently 'cd backend && npm run dev' 'cd frontend && npm run dev'"
   }
 }

@@ -5,10 +5,7 @@ export type SessionData = {
 	user: User;
 };
 
-export type ChatMessage = {
-	content: string;
-	channelId: number;
-	userId: string;
-	userName: string;
-	createdAt: number;
+export type Channel = {
+	name: string;
+	id: number;
 };

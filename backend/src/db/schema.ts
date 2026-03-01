@@ -19,6 +19,9 @@ export const user = sqliteTable("user", {
 export const channel = sqliteTable("channel", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
 });
 
 export const channelMember = sqliteTable(
@@ -39,7 +42,7 @@ export const message = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     content: text("content").notNull(),
-    authorId: text("author_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id),
     channelId: integer("channel_id")
@@ -154,5 +157,5 @@ export const channelMemberRelations = relations(channelMember, ({ one }) => ({
 
 export const messageRelations = relations(message, ({ one }) => ({
   channel: one(channel, { fields: [message.channelId], references: [channel.id] }),
-  author: one(user, { fields: [message.authorId], references: [user.id] }),
+  user: one(user, { fields: [message.userId], references: [user.id] }),
 }));

@@ -6,6 +6,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "esModuleInterop": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "paths": {
+      "@wavechat/shared": ["../shared/src"]
+    }
+  },
+  "include": ["src/**/*"]
 }
