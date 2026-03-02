@@ -16,7 +16,10 @@
 	async function sendMessage() {
 		if (!channelId) return;
 
-		chatStore.sendMessage(channelId, message);
+		let trimmed_message = message.trim();
+		if (trimmed_message === "") return;
+
+		chatStore.sendMessage(channelId, trimmed_message);
 		message = '';
 	}
 

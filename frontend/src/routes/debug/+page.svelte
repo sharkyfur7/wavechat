@@ -13,11 +13,15 @@
 	let input_add_member_channel_id = $state('');
 
 	async function createChannel() {
+		let channelName = input_create_channel_name.trim();
+
+		if (channelName === "") return;
+
 		let response = await fetch(`${PUBLIC_API_URL}/createChannel`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ channelName: input_create_channel_name })
+			body: JSON.stringify({ channelName })
 		});
 
 		input_create_channel_name = '';
@@ -25,6 +29,11 @@
 	}
 
 	async function addMember() {
+		let userId = input_add_member_id.trim();
+		let channelId = input_add_member_channel_id.trim();
+
+		if (userId === "" || channelId === "") return;
+
 		let response = await fetch(`${PUBLIC_API_URL}/addChannelMember`, {
 			method: 'POST',
 			credentials: 'include',
@@ -35,7 +44,8 @@
 			})
 		});
 
-		input_create_channel_name = '';
+		input_add_member_id = '';
+		input_add_member_channel_id = ''
 		alert(`${response.statusText} (${response.status})`);
 	}
 
