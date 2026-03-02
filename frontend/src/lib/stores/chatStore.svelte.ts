@@ -6,33 +6,43 @@ function createChatStore() {
 	let messageHistory: ChatMessage[] = $state([]);
 	let ws: WebSocket | null = $state(null);
 	let ws_state = $state<'CONNECTING' | 'OPEN' | 'DISCONNECTED'>('CONNECTING');
-	let currentChannelId = $state(-1);
+	const MAX_RECONNECT_RETRIES = 5;
+	const RECONNECT_MS = 4000;
+	let reconnect_try = 0;
 
-	function connect() {
+	function connect(): Promise<void> {
 		disconnect();
-		ws = new WebSocket(PUBLIC_WEBSOCKET_URL);
 
-		ws.onopen = () => {
-			ws_state = 'OPEN';
-			if (currentChannelId) subscribe(currentChannelId);
-		};
+		return new Promise((resolve) => {
+			ws = new WebSocket(PUBLIC_WEBSOCKET_URL);
 
-		ws.onclose = async () => {
-			ws_state = 'DISCONNECTED';
-			await sleep(3000);
-			connect();
-		};
+			ws.onopen = () => {
+				ws_state = 'OPEN';
+				resolve();
+			};
 
-		ws.onmessage = (event) => {
-			const { type, payload } = JSON.parse(event.data);
-			if (type === 'message') {
-				messageHistory.push(payload as ChatMessage);
-			}
-		};
+			ws.onclose = async () => {
+				ws_state = 'DISCONNECTED';
+
+				reconnect_try += 1;
+				if (reconnect_try > MAX_RECONNECT_RETRIES) {
+					return;
+				}
+
+				await sleep(RECONNECT_MS);
+				await connect();
+			};
+
+			ws.onmessage = (event) => {
+				const { type, payload } = JSON.parse(event.data);
+				if (type === 'message') {
+					messageHistory.push(payload as ChatMessage);
+				}
+			};
+		});
 	}
 
 	function subscribe(channelId: number) {
-		currentChannelId = channelId;
 		ws?.send(JSON.stringify({ type: 'subscribe', payload: { channelId } }));
 	}
 

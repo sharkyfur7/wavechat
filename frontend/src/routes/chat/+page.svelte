@@ -5,7 +5,7 @@
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { getSessionData } from '../auth/page.svelte';
 	import type { Channel, SessionData } from '../../types';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { sleep } from '$lib/util';
 	import { PUBLIC_API_URL } from '$env/static/public';
 
@@ -29,8 +29,7 @@
 			.then((r) => r.json())
 			.then((d) => d.channels);
 
-		chatStore.connect();
-		await sleep(100);
+		await chatStore.connect();
 		channelId = channels[0].id;
 		chatStore.subscribe(channelId);
 	});
@@ -39,8 +38,14 @@
 
 	$effect(() => {
 		if (channelId) {
-			chatStore.subscribe(channelId);
-			chatStore.loadMessages(channelId);
+			const id = channelId; // to make typescript not angry
+
+			// so that reading state inside these funcs
+			// doesnt re-trigger the $effect again
+			untrack(() => {
+				chatStore.subscribe(id);
+				chatStore.loadMessages(id);
+			})
 		}
 	});
 </script>
