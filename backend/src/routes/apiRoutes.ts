@@ -16,20 +16,20 @@ apiRoutes.post("/createChannel", requireAuth, async (req, res) => {
   channelName_str = channelName_str.trim();
 
   if (channelName_str === "") {
-    res.sendStatus(400);
+    res.status(400).json({ error: "channelName is empty" });
     return;
   }
 
   await createChannel(channelName_str);
 
-  res.sendStatus(201);
+  res.status(201).json({ status: "created" });
 });
 
 apiRoutes.post("/addChannelMember", requireAuth, async (req, res) => {
   const { userId, channelId } = req.body;
 
   if (!userId || !channelId) {
-    res.sendStatus(400);
+    res.status(400).json({ error: "userId/channelId is missing" });
     return;
   }
 
@@ -37,13 +37,13 @@ apiRoutes.post("/addChannelMember", requireAuth, async (req, res) => {
   const channel = await getChannel(channelId);
 
   if (!user || !channel) {
-    res.sendStatus(400);
+    res.status(400).json({ error: "user/channel does not exist" });
     return;
   }
 
   try {
     await addChannelMember(channelId, userId);
-    res.sendStatus(200);
+    res.status(200).json({ status: "OK" });
   } catch (e) {
     console.log(e);
     res.status(500).json(e);

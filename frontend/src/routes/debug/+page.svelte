@@ -25,7 +25,7 @@
 		});
 
 		input_create_channel_name = '';
-		alert(`${response.statusText} (${response.status})`);
+		alert(`${await response.json()} (${response.status})`);
 	}
 
 	async function addMember() {
@@ -46,7 +46,9 @@
 
 		input_add_member_id = '';
 		input_add_member_channel_id = ''
-		alert(`${response.statusText} (${response.status})`);
+		let res = await response.json();
+		console.log(res);
+		alert(`${res?.error || res?.status} (${response.status})`);
 	}
 
 	onMount(async () => {

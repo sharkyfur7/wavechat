@@ -15,6 +15,6 @@ export async function getUserChannels(userId: string) {
   return result;
 }
 
-export async function getUser(userId: string): Promise<User | undefined> {
-  return await db.select().from(user).where(eq(user.id, userId)).limit(1)[0];
+export async function getUser(userId: string): Promise<User | null> {
+  return (await db.select().from(user).where(eq(user.id, userId)).limit(1))[0] ?? null;
 }
