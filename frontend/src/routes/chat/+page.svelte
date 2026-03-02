@@ -7,6 +7,7 @@
 	import type { Channel, SessionData } from '../../types';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { PUBLIC_API_URL } from '$env/static/public';
+	import { sleep } from '$lib/util';
 
 	let sessionData: SessionData | null = $state(null);
 	let channelId: number | null = $state(null);
@@ -25,13 +26,16 @@
 
 	onMount(async () => {
 		sessionData = await getSessionData();
-		channels = await fetch(`${PUBLIC_API_URL}/getUserChannels`, {
+		let channel_response = await fetch(`${PUBLIC_API_URL}/getUserChannels`, {
 			credentials: 'include'
 		})
-			.then((r) => r.json())
-			.then((d) => d.channels);
+
+		channels = (await channel_response.json()).channels;
 
 		await chatStore.connect();
+		// sleep because it doesnt subscribe to the channel after
+		// connecting for some reason lmao
+		await sleep(10);
 		channelId = channels[0].id;
 		chatStore.subscribe(channelId);
 	});
