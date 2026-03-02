@@ -6,7 +6,6 @@
 	import { getSessionData } from '../auth/page.svelte';
 	import type { Channel, SessionData } from '../../types';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { sleep } from '$lib/util';
 	import { PUBLIC_API_URL } from '$env/static/public';
 
 	let sessionData: SessionData | null = $state(null);

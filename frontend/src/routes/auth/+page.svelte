@@ -1,13 +1,9 @@
 <script lang="ts">
 	import Navbar from '$lib/components/Navbar.svelte';
-	import type { Session, User } from 'better-auth';
 	import { sign_in, sign_up, sign_out, getSessionData } from './page.svelte';
 	import { onMount } from 'svelte';
-	import { authClient } from '$lib/auth-client';
 	import type { SessionData } from '../../types.js';
 	import UserInfo from '$lib/components/UserInfo.svelte';
-
-	let { data } = $props();
 
 	let sessionData: SessionData | null = $state(null);
 
