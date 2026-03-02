@@ -7,8 +7,9 @@
     "rootDir": "./src",
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "strict": true,
     "paths": {
-      "@wavechat/shared": ["../shared/src"]
+      "@wavechat/shared": ["../shared/dist"]
     }
   },
   "include": ["src/**/*"]

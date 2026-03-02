@@ -6,6 +6,9 @@ import * as schema from "./db/schema.js";
 
 dotenv.config({ quiet: true });
 
+if (!process.env.BETTER_AUTH_TRUSTED_ORIGIN)
+  throw new Error("env var BETTER_AUTH_TRUSTED_ORIGIN not set!");
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
   secret: process.env.BETTER_AUTH_SECRET,

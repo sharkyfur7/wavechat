@@ -18,6 +18,8 @@ channelRouter.get("/:id/messages", requireAuth, async (req: Request, res: Respon
 });
 
 channelRouter.post("/:id/messages", requireAuth, async (req: Request, res: Response) => {
+  if (!req.user) return res.sendStatus(401);
+
   const { id } = req.params;
   let { content } = req.body;
 

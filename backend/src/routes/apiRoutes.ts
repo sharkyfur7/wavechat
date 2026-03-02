@@ -51,6 +51,7 @@ apiRoutes.post("/addChannelMember", requireAuth, async (req, res) => {
 });
 
 apiRoutes.get("/getUserChannels", requireAuth, async (req, res) => {
+  if (!req.user) return res.sendStatus(401);
   res.status(200).json({ channels: await getUserChannels(req.user.id) });
 });
 

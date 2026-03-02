@@ -8,7 +8,7 @@ export async function getChannel(channelId: number): Promise<Channel | null> {
   return (await db.select().from(channel).where(eq(channel.id, channelId)))[0] ?? null;
 }
 
-export async function createChannel(name): Promise<Channel> {
+export async function createChannel(name: string): Promise<Channel> {
   return (await db.insert(channel).values({ name }).returning())[0];
 }
 
