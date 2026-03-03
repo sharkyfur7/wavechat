@@ -12,10 +12,52 @@
 	let input_add_member_id = $state('');
 	let input_add_member_channel_id = $state('');
 
+	let input_create_server_name = $state('');
+	let input_add_server_memberid = $state('');
+	let input_add_server_serverid = $state('');
+
+	async function createServer() {
+		let serverName = input_create_server_name.trim();
+
+		if (serverName === '') return;
+
+		let response = await fetch(`${PUBLIC_API_URL}/createServer`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: serverName })
+		});
+
+		input_create_server_name = '';
+		alert(`${await response.json()} (${response.status})`);
+	}
+
+	async function addServerMember() {
+		let userId = input_add_server_memberid.trim();
+		let serverId = input_add_server_serverid.trim();
+
+		if (userId === '' || serverId === '') return;
+
+		let response = await fetch(`${PUBLIC_API_URL}/addServerMember`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				userId,
+				serverId
+			})
+		});
+
+		input_add_server_memberid = '';
+		input_add_server_serverid = '';
+		let res = await response.json();
+		alert(`${res?.error || res?.status} (${response.status})`);
+	}
+
 	async function createChannel() {
 		let channelName = input_create_channel_name.trim();
 
-		if (channelName === "") return;
+		if (channelName === '') return;
 
 		let response = await fetch(`${PUBLIC_API_URL}/createChannel`, {
 			method: 'POST',
@@ -32,7 +74,7 @@
 		let userId = input_add_member_id.trim();
 		let channelId = input_add_member_channel_id.trim();
 
-		if (userId === "" || channelId === "") return;
+		if (userId === '' || channelId === '') return;
 
 		let response = await fetch(`${PUBLIC_API_URL}/addChannelMember`, {
 			method: 'POST',
@@ -45,9 +87,8 @@
 		});
 
 		input_add_member_id = '';
-		input_add_member_channel_id = ''
+		input_add_member_channel_id = '';
 		let res = await response.json();
-		console.log(res);
 		alert(`${res?.error || res?.status} (${response.status})`);
 	}
 
@@ -70,4 +111,13 @@
 	<input bind:value={input_add_member_id} type="text" placeholder="user id" />
 	<input bind:value={input_add_member_channel_id} type="text" placeholder="channel id" />
 	<button onclick={addMember}>Add</button>
+
+	<h3>Create server</h3>
+	<input bind:value={input_create_server_name} type="text" placeholder="server name" />
+	<button onclick={createServer}>Create</button>
+
+	<h3>Add server member</h3>
+	<input bind:value={input_add_server_memberid} type="text" placeholder="user id" />
+	<input bind:value={input_add_server_serverid} type="text" placeholder="server id" />
+	<button onclick={addServerMember}>Add</button>
 </div>

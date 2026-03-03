@@ -1,3 +1,19 @@
 :root {
 	font-family: 'Work Sans', sans-serif;
 }
+
+body {
+	min-height: 90vh;
+	background-color: rgb(29, 29, 29);
+	color: #fafafa;
+	padding: 8px 32px;
+}
+
+a,
+a:visited {
+	color: #2563eb;
+}
+
+a:hover {
+	text-decoration: none;
+}

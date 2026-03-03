@@ -16,13 +16,31 @@ export const user = sqliteTable("user", {
     .notNull(),
 });
 
-export const channel = sqliteTable("channel", {
+export const server = sqliteTable("server", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
 });
+
+export const channel = sqliteTable("channel", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+  serverId: integer("server_id").references(() => server.id),
+});
+
+export const serverMember = sqliteTable(
+  "server_member",
+  {
+    userId: text("user_id").references(() => user.id),
+    serverId: integer("server_id").references(() => server.id),
+  },
+  (t) => [uniqueIndex("uniq_server_member").on(t.serverId, t.userId)],
+);
 
 export const channelMember = sqliteTable(
   "channel_member",
@@ -153,6 +171,11 @@ export const channelRelations = relations(channel, ({ many }) => ({
 export const channelMemberRelations = relations(channelMember, ({ one }) => ({
   channel: one(channel, { fields: [channelMember.channelId], references: [channel.id] }),
   user: one(user, { fields: [channelMember.userId], references: [user.id] }),
+}));
+
+export const serverMemberRelations = relations(serverMember, ({ one }) => ({
+  server: one(server, { fields: [serverMember.serverId], references: [server.id] }),
+  user: one(user, { fields: [serverMember.userId], references: [user.id] }),
 }));
 
 export const messageRelations = relations(message, ({ one }) => ({

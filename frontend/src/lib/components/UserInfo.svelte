@@ -5,21 +5,38 @@
 	let { sessionData }: { sessionData: SessionData | null } = $props();
 </script>
 
-<div>
-	<b>/// User info ///</b>
+<div class="wrapper">
+	<table>
+		<tbody>
+			<tr>
+				<td>Username</td>
+				<td>{sessionData?.user.name ?? '<Signed out>'}</td>
+			</tr>
 
-	<div>
-		<b>UserId:</b>
-		{sessionData?.user.id ?? '<Signed out>'}
-	</div>
-
-	<div>
-		<b>Username:</b>
-		{sessionData?.user.name ?? '<Signed out>'}
-	</div>
-
-	<div>
-		<b>Email:</b>
-		{sessionData?.user.email ?? '<Signed out>'}
-	</div>
+			<tr>
+				<td>User ID</td>
+				<td>{sessionData?.user.id ?? '<Signed out>'}</td>
+			</tr>
+		</tbody>
+	</table>
 </div>
+
+<style>
+	.wrapper {
+		margin: 8px 0px;
+	}
+
+	table {
+		border: 1px solid grey;
+	}
+
+	td {
+		min-width: 8em;
+		padding: 2px 4px;
+	}
+
+	tr:nth-child(even) {
+		backdrop-filter: brightness(150%);
+		background: transparent;
+	}
+</style>

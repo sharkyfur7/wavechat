@@ -5,6 +5,7 @@ import type { ChatMessage } from '@wavechat/shared';
 function createChatStore() {
 	let messageHistory: ChatMessage[] = $state([]);
 	let ws: WebSocket | null = $state(null);
+	let subscribed_channel_id: number | null = null;
 	let ws_state = $state<'CONNECTING' | 'OPEN' | 'DISCONNECTED'>('CONNECTING');
 	const MAX_RECONNECT_RETRIES = 5;
 	const RECONNECT_MS = 4000;
@@ -43,7 +44,10 @@ function createChatStore() {
 	}
 
 	function subscribe(channelId: number) {
-		ws?.send(JSON.stringify({ type: 'subscribe', payload: { channelId } }));
+		if (ws) {
+			ws.send(JSON.stringify({ type: 'subscribe', payload: { channelId } }));
+			subscribed_channel_id = channelId;
+		}
 	}
 
 	async function loadMessages(channelId: number) {
@@ -65,6 +69,7 @@ function createChatStore() {
 
 	function disconnect() {
 		ws?.close();
+		subscribed_channel_id = null;
 	}
 
 	return {
@@ -73,6 +78,9 @@ function createChatStore() {
 		},
 		get wsState() {
 			return ws_state;
+		},
+		get subscribed_channel_id() {
+			return subscribed_channel_id;
 		},
 		connect,
 		disconnect,

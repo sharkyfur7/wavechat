@@ -10,8 +10,15 @@ export type ChatMessage = {
   createdAt: Date;
 };
 
+export type Server = {
+  name: string;
+  id: number;
+  createdAt: Date;
+};
+
 export type Channel = {
   name: string;
   id: number;
   createdAt: Date;
+  serverId: number | null;
 };
