@@ -6,9 +6,9 @@
 	import { getSessionData } from '../auth/page.svelte';
 	import type { SessionData } from '../../types';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { PUBLIC_API_URL } from '$env/static/public';
-	import { sleep } from '$lib/util';
 	import type { Server, Channel } from '@wavechat/shared';
+	import { fetchInitialChatData } from '$lib/services/chatData.svelte';
+	import ChatDebugInfo from '$lib/components/ChatDebugInfo.svelte';
 
 	// Input state
 	let selected_server_id: number | null = $state(null);
@@ -42,37 +42,34 @@
 		message = '';
 	}
 
-	onMount(async () => {
+	async function initializeChat() {
 		session_data = await getSessionData();
+		if (!session_data) return;
+
+		// gotta connect to da backend first!
 		await chatStore.connect();
-		// sleep because it doesnt subscribe to the channel after
-		// connecting for some reason lmao
-		await sleep(10); //
 
-		// Fetch channels
-		let channel_response = await fetch(`${PUBLIC_API_URL}/getUserChannels`, {
-			credentials: 'include'
-		});
-		all_channels = (await channel_response.json()).channels;
-
-		// Fetch servers
-		let server_response = await fetch(`${PUBLIC_API_URL}/getUserServers`, {
-			credentials: 'include'
-		});
-		user_servers = (await server_response.json()).servers;
+		const { channels, servers } = await fetchInitialChatData();
+		user_servers = servers;
+		all_channels = channels;
 		selected_server_id = user_servers[0]?.id ?? null;
+	}
+
+	onMount(async () => {
+		await initializeChat();
 	});
 
 	onDestroy(() => chatStore.disconnect());
 
+	// channel mode change
 	$effect(() => {
-		if (channel_mode === 'server') {
-			selected_server_id = user_servers[0]?.id ?? null;
-			selected_channel_id = current_channels[0]?.id ?? null;
-		} else {
-			selected_channel_id = current_channels[0]?.id ?? null;
-		}
+		if (channel_mode === 'server') selected_server_id = user_servers[0]?.id ?? null;
+		if (channel_mode === 'private') selected_server_id = null;
+		selected_channel_id = current_channels[0]?.id ?? null;
+	});
 
+	// channel change
+	$effect(() => {
 		if (selected_channel_id && chatStore.subscribed_channel_id !== selected_channel_id) {
 			untrack(() => {
 				//@ts-ignore
@@ -90,10 +87,11 @@
 {#if session_data}
 	<UserInfo sessionData={session_data} />
 
-	<div>
-		Websocket state: {chatStore.wsState}<br />
-		ChannelId: {selected_channel_id}
-	</div>
+	<ChatDebugInfo
+		ws_state={chatStore.wsState}
+		channel_id={selected_channel_id}
+		server_id={selected_server_id}
+	></ChatDebugInfo>
 
 	<div>
 		<div id="chatbox">
