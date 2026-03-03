@@ -16,80 +16,54 @@
 	let input_add_server_memberid = $state('');
 	let input_add_server_serverid = $state('');
 
-	async function createServer() {
-		let serverName = input_create_server_name.trim();
-
-		if (serverName === '') return;
-
-		let response = await fetch(`${PUBLIC_API_URL}/createServer`, {
+	async function apiCall(endpoint: string, body: object) {
+		const response = await fetch(`${PUBLIC_API_URL}/${endpoint}`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name: serverName })
+			body: JSON.stringify(body)
 		});
+		return { data: await response.json(), status: response.status };
+	}
 
+	async function createServer() {
+		let name = input_create_server_name.trim();
+		if (name === '') return;
 		input_create_server_name = '';
-		alert(`${await response.json()} (${response.status})`);
+
+		const response = await apiCall('createServer', { name });
+		alert(`${response.data} (${response.status})`);
 	}
 
 	async function addServerMember() {
 		let userId = input_add_server_memberid.trim();
 		let serverId = input_add_server_serverid.trim();
-
 		if (userId === '' || serverId === '') return;
-
-		let response = await fetch(`${PUBLIC_API_URL}/addServerMember`, {
-			method: 'POST',
-			credentials: 'include',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				userId,
-				serverId
-			})
-		});
-
 		input_add_server_memberid = '';
 		input_add_server_serverid = '';
-		let res = await response.json();
-		alert(`${res?.error || res?.status} (${response.status})`);
+
+		const response = await apiCall('addServerMember', { userId, serverId });
+		alert(`${response.data?.error || response.data?.status} (${response.status})`);
 	}
 
 	async function createChannel() {
 		let channelName = input_create_channel_name.trim();
-
 		if (channelName === '') return;
-
-		let response = await fetch(`${PUBLIC_API_URL}/createChannel`, {
-			method: 'POST',
-			credentials: 'include',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ channelName })
-		});
-
 		input_create_channel_name = '';
-		alert(`${await response.json()} (${response.status})`);
+
+		const response = await apiCall('createChannel', { channelName });
+		alert(`${response.data} (${response.status})`);
 	}
 
 	async function addMember() {
 		let userId = input_add_member_id.trim();
 		let channelId = input_add_member_channel_id.trim();
-
 		if (userId === '' || channelId === '') return;
-
-		let response = await fetch(`${PUBLIC_API_URL}/addChannelMember`, {
-			method: 'POST',
-			credentials: 'include',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				userId: input_add_member_id,
-				channelId: input_add_member_channel_id
-			})
-		});
-
 		input_add_member_id = '';
 		input_add_member_channel_id = '';
-		let res = await response.json();
-		alert(`${res?.error || res?.status} (${response.status})`);
+
+		const response = await apiCall('addChannelMember', { userId, channelId });
+		alert(`${response.data?.error || response.data?.status} (${response.status})`);
 	}
 
 	onMount(async () => {

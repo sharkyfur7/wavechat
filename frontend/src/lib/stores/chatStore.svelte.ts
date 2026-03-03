@@ -19,6 +19,7 @@ function createChatStore() {
 
 			ws.onopen = () => {
 				ws_state = 'OPEN';
+				reconnect_try = 0;
 				resolve();
 			};
 

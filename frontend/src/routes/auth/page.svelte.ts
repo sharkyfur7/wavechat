@@ -12,8 +12,6 @@ export async function sign_up(username: string, password: string, email: string)
 			name: username // user display name
 		},
 		{
-			onRequest: () => {},
-			onSuccess: async () => {},
 			onError: (ctx) => {
 				alert(ctx.error.message);
 				console.log(ctx.error);
