@@ -1,11 +1,14 @@
 <script lang="ts">
 	import type { User } from 'better-auth';
 
-	const { userName, content, date } = $props();
+	const { userName, content, date }: { userName: string; content: string; date: Date } = $props();
+
+	let hours = $derived(date.getHours().toString().padStart(2, '0'));
+	let minutes = $derived(date.getMinutes().toString().padStart(2, '0'));
 </script>
 
 <div class="msg">
-	<span class="time">[{date.getHours()}:{date.getMinutes()}]</span>
+	<span class="time">[{hours}:{minutes}]</span>
 	<span class="name">&lt;{userName}&gt;</span>
 	<span>{content}</span>
 </div>
@@ -22,5 +25,7 @@
 
 	.time {
 		opacity: 0.5;
+		/* useful for displaying time! */
+		font-variant-numeric: tabular-nums;
 	}
 </style>
