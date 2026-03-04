@@ -3,13 +3,23 @@ import { db } from "../db.js";
 import { channel, channelMember, user } from "./schema.js";
 import { Channel } from "@wavechat/shared";
 import { getUser } from "./user.js";
+import { getServerUsers } from "./server.js";
 
 export async function getChannel(channelId: number): Promise<Channel | null> {
   return (await db.select().from(channel).where(eq(channel.id, channelId)))[0] ?? null;
 }
 
-export async function createChannel(name: string): Promise<Channel> {
-  return (await db.insert(channel).values({ name }).returning())[0];
+export async function createChannel(name: string, serverId: number | null): Promise<Channel> {
+  let c = (await db.insert(channel).values({ name, serverId }).returning())[0];
+
+  if (serverId) {
+    const server_members = await getServerUsers(serverId);
+    for (const member of server_members) {
+      await addChannelMember(c.id, member.id);
+    }
+  }
+
+  return c;
 }
 
 export async function addChannelMember(channelId: number, userId: string) {

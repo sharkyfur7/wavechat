@@ -11,14 +11,18 @@ apiRoutes.get("/", (req, res) => {
 });
 
 apiRoutes.post("/createChannel", requireAuth, async (req, res) => {
-  const { channelName } = req.body;
+  const { channelName, serverId } = req.body;
 
   let channelName_str: string = channelName.toString();
+  let serverId_num = Number(serverId) || null;
   channelName_str = channelName_str.trim();
-
   if (channelName_str === "") return res.status(400).json({ error: "channelName is empty" });
 
-  await createChannel(channelName_str);
+  try {
+    await createChannel(channelName_str, serverId_num);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
 
   res.status(201).json({ status: "created" });
 });
