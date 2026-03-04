@@ -16,7 +16,7 @@ A project to proove that I can actually program complete products, not just scro
 _(but half of these probably won't get implemented)_
 
 - [x] Basic auth
-- [x] Private channels
+- [x] Private channels (direct messages, group chats)
 - [x] Server channels
 - [ ] Reasonable UI
 - [ ] E2EE direct (one on one) messages _(maybe group chats in the future)_
