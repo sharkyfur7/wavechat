@@ -1,14 +1,15 @@
 <script lang="ts">
 	import Navbar from '$lib/components/Navbar.svelte';
 	import UserInfo from '$lib/components/UserInfo.svelte';
-	import ChatMessageComponent from '$lib/components/ChatMessageComponent.svelte';
+	import ChatMessageComponent from '$lib/components/chat/ChatMessageComponent.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { getSessionData } from '../auth/page.svelte';
 	import type { SessionData } from '../../types';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import type { Server, Channel } from '@wavechat/shared';
 	import { fetchInitialChatData } from '$lib/services/chatData.svelte';
-	import ChatDebugInfo from '$lib/components/ChatDebugInfo.svelte';
+	import ChatDebugInfo from '$lib/components/chat/ChatDebugInfo.svelte';
+	import ChatBox from '$lib/components/chat/ChatBox.svelte';
 
 	// Input state
 	let selected_server_id: number | null = $state(null);
@@ -94,15 +95,7 @@
 	></ChatDebugInfo>
 
 	<div>
-		<div id="chatbox">
-			{#each chatStore.messages as message}
-				<ChatMessageComponent
-					userName={message.user.name}
-					content={message.content}
-					date={new Date(message.createdAt)}
-				/>
-			{/each}
-		</div>
+		<ChatBox messages={chatStore.messages}></ChatBox>
 
 		<form>
 			<label>
@@ -138,15 +131,3 @@
 {:else}
 	<h2>You are not signed in.</h2>
 {/if}
-
-<style>
-	#chatbox {
-		height: 256px;
-		width: 600px;
-		overflow-y: auto;
-		border: 1px solid black;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-	}
-</style>
