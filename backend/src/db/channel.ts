@@ -5,11 +5,11 @@ import { Channel } from "@wavechat/shared";
 import { getUser } from "./user.js";
 import { getServerUsers } from "./server.js";
 
-export async function getChannel(channelId: number): Promise<Channel | null> {
+export async function getChannel(channelId: string): Promise<Channel | null> {
   return (await db.select().from(channel).where(eq(channel.id, channelId)))[0] ?? null;
 }
 
-export async function createChannel(name: string, serverId: number | null): Promise<Channel> {
+export async function createChannel(name: string, serverId: string | null): Promise<Channel> {
   let c = (await db.insert(channel).values({ name, serverId }).returning())[0];
 
   if (serverId) {
@@ -22,7 +22,7 @@ export async function createChannel(name: string, serverId: number | null): Prom
   return c;
 }
 
-export async function addChannelMember(channelId: number, userId: string) {
+export async function addChannelMember(channelId: string, userId: string) {
   const channel = await getChannel(channelId);
   const user = await getUser(userId);
 

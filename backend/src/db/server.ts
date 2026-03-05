@@ -10,11 +10,11 @@ export async function createServer(name: string): Promise<Server> {
   return (await db.insert(server).values({ name }).returning())[0];
 }
 
-export async function getServer(serverId: number): Promise<Server | null> {
+export async function getServer(serverId: string): Promise<Server | null> {
   return (await db.select().from(server).where(eq(server.id, serverId)))[0] ?? null;
 }
 
-export async function getServerUsers(serverId: number): Promise<User[]> {
+export async function getServerUsers(serverId: string): Promise<User[]> {
   return await db
     .select({
       ...getTableColumns(user),
@@ -24,7 +24,7 @@ export async function getServerUsers(serverId: number): Promise<User[]> {
     .innerJoin(user, eq(user.id, serverMember.userId));
 }
 
-export async function addUserToServer(userId: string, serverId: number): Promise<void> {
+export async function addUserToServer(userId: string, serverId: string): Promise<void> {
   if (!(await getServer(serverId))) throw new Error(`Server with id ${serverId} does not exist`); // server does not exist
   if (!(await getUser(userId))) throw new Error(`User with id ${userId} does not exist`); // user does not exist
   if (await isUserServerMember(userId, serverId)) return; // user is already a member
@@ -52,7 +52,7 @@ export async function getUserServers(userId: string): Promise<Server[]> {
     .where(eq(serverMember.userId, userId));
 }
 
-export async function isUserServerMember(userId: string, serverId: number): Promise<boolean> {
+export async function isUserServerMember(userId: string, serverId: string): Promise<boolean> {
   const user_row = (
     await db
       .select()

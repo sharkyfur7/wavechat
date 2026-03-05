@@ -5,20 +5,20 @@ export type SimplifiedUser = {
 
 export type ChatMessage = {
   content: string;
-  channelId: number;
+  channelId: string;
   user: SimplifiedUser;
   createdAt: Date;
 };
 
 export type Server = {
   name: string;
-  id: number;
+  id: string;
   createdAt: Date;
 };
 
 export type Channel = {
   name: string;
-  id: number;
+  id: string;
   createdAt: Date;
-  serverId: number | null;
+  serverId: string | null;
 };

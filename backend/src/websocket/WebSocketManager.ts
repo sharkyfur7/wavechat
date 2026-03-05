@@ -7,7 +7,7 @@ import { User } from "better-auth";
 export class WebSocketManager {
   private clients = new Map<WebSocket, ClientMeta>();
 
-  setClient(ws: WebSocket, userId: string, channelId: number) {
+  setClient(ws: WebSocket, userId: string, channelId: string) {
     this.clients.set(ws, { userId, channelId });
   }
 

@@ -13,13 +13,13 @@ apiRoutes.get("/", (req, res) => {
 apiRoutes.post("/createChannel", requireAuth, async (req, res) => {
   const { channelName, serverId } = req.body;
 
+  // trim channel name
   let channelName_str: string = channelName.toString();
-  let serverId_num = Number(serverId) || null;
   channelName_str = channelName_str.trim();
   if (channelName_str === "") return res.status(400).json({ error: "channelName is empty" });
 
   try {
-    await createChannel(channelName_str, serverId_num);
+    await createChannel(channelName_str, serverId || null);
   } catch (e) {
     return res.status(500).json({ error: e });
   }
@@ -37,21 +37,16 @@ apiRoutes.post("/createServer", requireAuth, async (req, res) => {
 
   await createServer(server_name);
 
-  res.sendStatus(200);
+  res.status(201).json({ status: "created" });
 });
 
 apiRoutes.post("/addServerMember", requireAuth, async (req, res) => {
   const { userId, serverId } = req.body;
 
-  let userId_str: string = userId.toString();
-  let serverId_num: number = Number(serverId);
-  userId_str = userId_str.trim();
-
-  if (userId_str === "" || !serverId_num)
-    return res.status(400).json({ error: "empty userId or serverId" });
+  if (!userId || !serverId) return res.status(400).json({ error: "empty userId or serverId" });
 
   try {
-    await addUserToServer(userId_str, serverId_num);
+    await addUserToServer(userId, serverId);
   } catch (e) {
     res.status(400).json({ error: e });
     return;
@@ -81,7 +76,7 @@ apiRoutes.post("/addChannelMember", requireAuth, async (req, res) => {
     res.status(200).json({ status: "OK" });
   } catch (e) {
     console.log(e);
-    res.status(500).json(e);
+    res.status(500).json({ error: e });
   }
 });
 

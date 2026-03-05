@@ -7,13 +7,9 @@ const channelRouter = Router();
 
 channelRouter.get("/:id/messages", requireAuth, async (req: Request, res: Response) => {
   const { id } = req.params;
-  let channelId = Number(id);
+  if (!id) return res.sendStatus(400);
 
-  if (!channelId) {
-    res.sendStatus(400);
-    return;
-  }
-
+  let channelId = id.toString();
   res.json(await getMessages(channelId));
 });
 
@@ -21,13 +17,12 @@ channelRouter.post("/:id/messages", requireAuth, async (req: Request, res: Respo
   if (!req.user) return res.sendStatus(401);
 
   const { id } = req.params;
-  let { content } = req.body;
+  const { content } = req.body;
+  let channelId = id.toString();
 
   // some input validation
   let content_str: string = content.toString();
   content_str = content_str.trim();
-
-  let channelId = Number(id);
 
   if (content_str === "" || !channelId) {
     res.sendStatus(400);

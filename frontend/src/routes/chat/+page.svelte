@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Navbar from '$lib/components/Navbar.svelte';
 	import UserInfo from '$lib/components/UserInfo.svelte';
-	import ChatMessageComponent from '$lib/components/chat/ChatMessageComponent.svelte';
 	import { chatStore } from '$lib/stores/chatStore.svelte';
 	import { getSessionData } from '../auth/page.svelte';
 	import type { SessionData } from '../../types';
@@ -12,8 +11,8 @@
 	import ChatBox from '$lib/components/chat/ChatBox.svelte';
 
 	// Input state
-	let selected_server_id: number | null = $state(null);
-	let selected_channel_id: number | null = $state(null);
+	let selected_server_id: string | null = $state(null);
+	let selected_channel_id: string | null = $state(null);
 	let message = $state('');
 	let channel_mode: 'server' | 'private' = $state('server');
 
@@ -73,9 +72,9 @@
 	$effect(() => {
 		if (selected_channel_id && chatStore.subscribed_channel_id !== selected_channel_id) {
 			untrack(() => {
-				//@ts-ignore
+				//@ts-expect-error selected_channel_id is already checked but ts is stupid
 				chatStore.subscribe(selected_channel_id);
-				//@ts-ignore
+				//@ts-expect-error the same applies here
 				chatStore.loadMessages(selected_channel_id);
 			});
 		}
@@ -112,14 +111,14 @@
 		<div>
 			{#if channel_mode === 'server'}
 				<select bind:value={selected_server_id} name="server">
-					{#each user_servers as server}
+					{#each user_servers as server (server.id)}
 						<option value={server.id}>{server.name}</option>
 					{/each}
 				</select>
 			{/if}
 
 			<select bind:value={selected_channel_id} name="channel">
-				{#each current_channels as channel}
+				{#each current_channels as channel (channel.id)}
 					<option value={channel.id}>{channel.name}</option>
 				{/each}
 			</select>

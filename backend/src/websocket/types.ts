@@ -5,5 +5,5 @@ export interface WSMessage {
 
 export interface ClientMeta {
   userId: string;
-  channelId: number;
+  channelId: string;
 }

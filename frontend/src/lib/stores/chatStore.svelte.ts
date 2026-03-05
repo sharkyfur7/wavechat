@@ -5,7 +5,7 @@ import type { ChatMessage } from '@wavechat/shared';
 function createChatStore() {
 	let messageHistory: ChatMessage[] = $state([]);
 	let ws: WebSocket | null = $state(null);
-	let subscribed_channel_id: number | null = null;
+	let subscribed_channel_id: string | null = null;
 	let ws_state = $state<'CONNECTING' | 'OPEN' | 'DISCONNECTED'>('CONNECTING');
 	const MAX_RECONNECT_RETRIES = 5;
 	const RECONNECT_MS = 4000;
@@ -44,14 +44,14 @@ function createChatStore() {
 		});
 	}
 
-	function subscribe(channelId: number) {
+	function subscribe(channelId: string) {
 		if (ws) {
 			ws.send(JSON.stringify({ type: 'subscribe', payload: { channelId } }));
 			subscribed_channel_id = channelId;
 		}
 	}
 
-	async function loadMessages(channelId: number) {
+	async function loadMessages(channelId: string) {
 		const response = await fetch(`${PUBLIC_API_URL}/channels/${channelId}/messages`, {
 			credentials: 'include'
 		});
@@ -59,7 +59,7 @@ function createChatStore() {
 		messageHistory = messages;
 	}
 
-	async function sendMessage(channelId: number, content: string) {
+	async function sendMessage(channelId: string, content: string) {
 		await fetch(`${PUBLIC_API_URL}/channels/${channelId}/messages`, {
 			method: 'POST',
 			body: JSON.stringify({ content }),

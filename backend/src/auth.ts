@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db.js";
 import * as schema from "./db/schema.js";
+import { generateSnowflake } from "./lib/snowflake.js";
 
 dotenv.config({ quiet: true });
 
@@ -16,4 +17,9 @@ export const auth = betterAuth({
   basePath: "/auth",
   trustedOrigins: [process.env.BETTER_AUTH_TRUSTED_ORIGIN],
   emailAndPassword: { enabled: true },
+  advanced: {
+    database: {
+      generateId: () => generateSnowflake(),
+    },
+  },
 });

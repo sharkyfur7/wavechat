@@ -6,7 +6,7 @@ import { ChatMessage } from "@wavechat/shared";
 
 export async function insertMessage(
   content: string,
-  channelId: number,
+  channelId: string,
   user: User,
 ): Promise<ChatMessage> {
   let result = (
@@ -30,7 +30,7 @@ export async function insertMessage(
   return msg;
 }
 
-export async function getMessages(channelId: number, limit = 50): Promise<ChatMessage[]> {
+export async function getMessages(channelId: string, limit = 50): Promise<ChatMessage[]> {
   const result = await db
     .select({
       id: message.id,

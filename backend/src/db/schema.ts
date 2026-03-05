@@ -1,8 +1,11 @@
 import { relations, sql } from "drizzle-orm";
 import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { generateSnowflake } from "../lib/snowflake.js";
 
 export const user = sqliteTable("user", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateSnowflake()),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
@@ -17,7 +20,9 @@ export const user = sqliteTable("user", {
 });
 
 export const server = sqliteTable("server", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateSnowflake()),
   name: text("name").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -25,19 +30,21 @@ export const server = sqliteTable("server", {
 });
 
 export const channel = sqliteTable("channel", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => generateSnowflake()),
   name: text("name").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
-  serverId: integer("server_id").references(() => server.id),
+  serverId: text("server_id").references(() => server.id),
 });
 
 export const serverMember = sqliteTable(
   "server_member",
   {
     userId: text("user_id").references(() => user.id),
-    serverId: integer("server_id").references(() => server.id),
+    serverId: text("server_id").references(() => server.id),
   },
   (t) => [uniqueIndex("uniq_server_member").on(t.serverId, t.userId)],
 );
@@ -45,7 +52,7 @@ export const serverMember = sqliteTable(
 export const channelMember = sqliteTable(
   "channel_member",
   {
-    channelId: integer("channel_id")
+    channelId: text("channel_id")
       .references(() => channel.id)
       .notNull(),
     userId: text("user_id")
@@ -58,12 +65,14 @@ export const channelMember = sqliteTable(
 export const message = sqliteTable(
   "message",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => generateSnowflake()),
     content: text("content").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id),
-    channelId: integer("channel_id")
+    channelId: text("channel_id")
       .notNull()
       .references(() => channel.id),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
