@@ -21,6 +21,7 @@ export async function insertMessage(
   )[0];
 
   let msg: ChatMessage = {
+    id: result.id,
     content: result.content,
     channelId: result.channelId,
     user: { id: user.id, name: user.name },

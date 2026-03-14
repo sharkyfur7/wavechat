@@ -4,6 +4,7 @@ export type SimplifiedUser = {
 };
 
 export type ChatMessage = {
+  id: string;
   content: string;
   channelId: string;
   user: SimplifiedUser;

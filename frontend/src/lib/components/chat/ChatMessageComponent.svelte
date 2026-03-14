@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { User } from 'better-auth';
-
 	const { userName, content, date }: { userName: string; content: string; date: Date } = $props();
 
 	let hours = $derived(date.getHours().toString().padStart(2, '0'));

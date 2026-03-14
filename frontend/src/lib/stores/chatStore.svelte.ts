@@ -44,10 +44,17 @@ function createChatStore() {
 		});
 	}
 
-	function subscribe(channelId: string) {
+	async function subscribe(channelId: string): Promise<void> {
 		if (ws) {
+			if (ws.readyState === ws.CLOSED || ws.readyState === ws.CLOSING) {
+				throw new Error('WebSocket is CLOSING or CLOSED!');
+			} else {
+				await sleep(100);
+			}
+
 			ws.send(JSON.stringify({ type: 'subscribe', payload: { channelId } }));
 			subscribed_channel_id = channelId;
+			console.log(`Subscribe to ${channelId}`);
 		}
 	}
 
@@ -57,6 +64,10 @@ function createChatStore() {
 		});
 		const messages = await response.json();
 		messageHistory = messages;
+	}
+
+	function clearMessages() {
+		messageHistory = [];
 	}
 
 	async function sendMessage(channelId: string, content: string) {
@@ -71,6 +82,7 @@ function createChatStore() {
 	function disconnect() {
 		ws?.close();
 		subscribed_channel_id = null;
+		console.log('Closing ws');
 	}
 
 	return {
@@ -87,6 +99,7 @@ function createChatStore() {
 		disconnect,
 		subscribe,
 		loadMessages,
+		clearMessages,
 		sendMessage
 	};
 }
